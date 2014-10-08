@@ -1,0 +1,44 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'maven'
+
+sourceCompatibility = 1.8
+group = 'com.github.disc99.kuroko'
+version = '0.0.1'
+
+repositories {
+    mavenCentral()
+    maven { url "http://disc99.github.io/maven/" }
+}
+
+dependencies {
+    compile "com.github.disc99.template:template:0.0.1"
+    testCompile group: 'junit', name: 'junit', version: '4.+'
+}
+
+task sourcesJar(type: Jar, dependsOn:classes) {
+     classifier = 'sources'
+     from sourceSets.main.allSource
+}
+
+artifacts {
+    archives sourcesJar
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: "file:${System.getProperty('user.home')}/data/src/java/maven")
+        }
+    }
+}
+
+task 	() {
+	uploadArchives {
+	    repositories {
+	        mavenDeployer {
+	            repository(url: "file:${System.getProperty('user.home')}/.m2/repository/")
+	        }
+	    }
+	}
+}
