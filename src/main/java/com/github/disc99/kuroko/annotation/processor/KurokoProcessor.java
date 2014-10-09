@@ -7,8 +7,8 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.lang.model.element.TypeElement;
 
-@SupportedAnnotationTypes("com.github.monzou.grinder.annotation.Kuroko")
-public class Processor extends AbstractProcessor {
+@SupportedAnnotationTypes("com.github.disc99.kuroko.annotation.Kuroko")
+public class KurokoProcessor extends AbstractProcessor {
 
 	@Override
 	public boolean process(Set<? extends TypeElement> annotations,

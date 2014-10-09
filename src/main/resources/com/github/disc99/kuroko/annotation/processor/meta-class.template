@@ -1,0 +1,17 @@
+package {{packageName}};
+
+/**
+ * {{className}}
+ */
+public class {{className}} {
+
+	public static final String PACKAGE = "{{packageName}}";
+	public static final String FULL_NAME = "{{packageName}}.{{className}}";
+	public static final String NAME = "{{className}}";
+
+	public static class Property {
+{{# properties}}
+		public static final String {{name}} = "{{name}}";
+{{/ properties}}
+	}
+}
