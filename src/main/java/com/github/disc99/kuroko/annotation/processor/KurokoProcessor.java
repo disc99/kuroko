@@ -1,11 +1,14 @@
 package com.github.disc99.kuroko.annotation.processor;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.net.URL;
+import java.io.InputStreamReader;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
@@ -24,25 +27,24 @@ import javax.tools.Diagnostic.Kind;
 import javax.tools.JavaFileObject;
 
 import com.github.disc99.template.engine.Template;
-import com.github.disc99.template.util.Strings2;
-import com.google.common.base.Charsets;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Maps;
-import com.google.common.io.Resources;
+import com.github.disc99.template.util.Strings;
 
 @SupportedAnnotationTypes(Constants.ANNOTATION)
 public class KurokoProcessor extends AbstractProcessor {
 
     private static final Template TEMPLATE;
     static {
-        URL resource = Resources.getResource(KurokoProcessor.class, "meta-class.template");
         try {
-            TEMPLATE = new Template(Resources.toString(resource, Charsets.UTF_8));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        	StringBuffer sb = new StringBuffer();
+			BufferedReader br = new BufferedReader(new InputStreamReader(KurokoProcessor.class.getResourceAsStream("meta-class.template"), "UTF-8"));
+			for (int c = br.read(); c != -1; c = br.read()){
+				sb.append((char)c);
+			}
+
+			TEMPLATE = new Template(sb.toString());   
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
     }
 
     /** {@inheritDoc} */
@@ -96,7 +98,7 @@ public class KurokoProcessor extends AbstractProcessor {
 
         BeanMetaData bean = new BeanMetaData(element);
 
-        Map<String, PropertyMetaData> properties = Maps.newLinkedHashMap();
+        Map<String, PropertyMetaData> properties = new LinkedHashMap<>();
 
         // collect public getters
         for (ExecutableElement e : ElementFilter.methodsIn(element.getEnclosedElements())) {
@@ -106,7 +108,6 @@ public class KurokoProcessor extends AbstractProcessor {
             }
             if (modifiers.contains(Modifier.PUBLIC) && e.getParameters().isEmpty()) {
                 PropertyMetaData metaData = new PropertyMetaData(bean, e, false);
-//                String methodName = metaData.getMethodName();
                 if (metaData.isGetter()) {
                     String propertyName = metaData.getName();
                     if (properties.containsKey(propertyName)) {
@@ -117,7 +118,6 @@ public class KurokoProcessor extends AbstractProcessor {
             }
         }
 
-        // collect public setters
         for (ExecutableElement e : ElementFilter.methodsIn(element.getEnclosedElements())) {
             Set<Modifier> modifiers = e.getModifiers();
             if (modifiers.contains(Modifier.STATIC)) {
@@ -125,7 +125,6 @@ public class KurokoProcessor extends AbstractProcessor {
             }
             if (modifiers.contains(Modifier.PUBLIC) && e.getParameters().size() == 1) {
                 PropertyMetaData metaData = new PropertyMetaData(bean, e, true);
-//                String methodName = metaData.getMethodName();
                 if (metaData.isSetter()) {
                     String propertyName = metaData.getName();
                     if (properties.containsKey(propertyName)) {
@@ -170,21 +169,15 @@ public class KurokoProcessor extends AbstractProcessor {
         }
 
         public List<PropertyMetaData> getProperties() {
-            return FluentIterable.from(properties.values()).filter(new Predicate<PropertyMetaData>() {
-                @Override
-                public boolean apply(PropertyMetaData property) {
-                    return property.isWritable();
-                }
-            }).toList();
+        	return properties.values().stream()
+        				.filter(property -> property.isWritable())
+        				.collect(Collectors.toList());
         }
 
         public List<PropertyMetaData> getPropertyAccessors() {
-            return FluentIterable.from(properties.values()).filter(Predicates.not(new Predicate<PropertyMetaData>() {
-                @Override
-                public boolean apply(PropertyMetaData property) {
-                    return property.isWritable();
-                }
-            })).toList();
+        	return properties.values().stream()
+        				.filter(property -> !property.isWritable())
+        				.collect(Collectors.toList());
         }
 
         private String toMetaPackageName(String baseName) {
@@ -200,7 +193,7 @@ public class KurokoProcessor extends AbstractProcessor {
             String prefix = getOption(Options.CLASS_PREFIX, null);
             String suffix = getOption(Options.CLASS_SUFFIX, null);
             if (prefix == null && suffix == null) {
-                suffix = "Meta";
+                suffix = "__";
             }
             String className = baseName;
             if (prefix != null) {
@@ -257,7 +250,7 @@ public class KurokoProcessor extends AbstractProcessor {
 
         public String getName() {
             String methodName = getMethodName();
-            return Strings2.uncapitalize(methodName.replaceAll("^(set|get|is)", ""));
+            return Strings.uncapitalize(methodName.replaceAll("^(set|get|is)", ""));
         }
 
         public String getWrappedType() {
@@ -278,11 +271,11 @@ public class KurokoProcessor extends AbstractProcessor {
 
         public String getReadMethodName() {
             String template = "boolean".equals(getType()) ? "is%s" : "get%s";
-            return String.format(template, Strings2.capitalize(getName()));
+            return String.format(template, Strings.capitalize(getName()));
         }
 
         public String getWriteMethodName() {
-            return String.format("set%s", Strings2.capitalize(getName()));
+            return String.format("set%s", Strings.capitalize(getName()));
         }
 
         public boolean isGetter() {

@@ -1,18 +1,18 @@
-package com.github.disc99.kuroko.util;
+package com.github.disc99.template.engine;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicates;
-import com.google.common.base.Splitter;
-import com.google.common.base.Strings;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableMap;
+import com.github.disc99.template.util.Beans;
+import com.github.disc99.template.util.Strings;
 
 /**
  * Minimal template engine
@@ -21,34 +21,19 @@ public class Template {
 
     private static final Pattern EXPRESSION_PATTERN = Pattern.compile("\\{\\{(.*?)\\}\\}");
 
-    private static final Pattern EACH_EXPRESSION_PATTERN = Pattern.compile("\\{\\{#each (.*?)\\}\\}(.*?)\\{\\{/each\\}\\}", Pattern.DOTALL);
+    private static final Pattern EACH_EXPRESSION_PATTERN = Pattern.compile("\\{\\{# (.*?)\\}\\}(.*?)\\{\\{/\\}\\}", Pattern.DOTALL);
 
-    private static final String FUNCTION_SEPARATOR = "|";
+    private static final String FUNCTION_SEPARATOR = "\\|";
 
     private static final Map<String, Function<String, String>> FUNCTIONS;
     static {
-        ImmutableMap.Builder<String, Function<String, String>> builder = ImmutableMap.builder();
-        builder.put("capitalize", new Function<String, String>() {
-            @Override
-            public String apply(String value) {
-                return Strings2.capitalize(value);
-            }
-        });
-        builder.put("uncapitalize", new Function<String, String>() {
-            @Override
-            public String apply(String value) {
-                return Strings2.uncapitalize(value);
-            }
-        });
-        FUNCTIONS = builder.build();
+        FUNCTIONS = new HashMap<>();
+        FUNCTIONS.put("capitalize", (value) -> Strings.capitalize(value));
+        FUNCTIONS.put("uncapitalize", (value) -> Strings.uncapitalize(value));
     }
 
-    private static final Function<String, Function<String, String>> FUNCTION_RESOLVER = new Function<String, Function<String, String>>() {
-        @Override
-        public Function<String, String> apply(String functionName) {
-            return FUNCTIONS.get(functionName.trim());
-        }
-    };
+	private static final Function<String, Function<String, String>> FUNCTION_RESOLVER
+		= (functionName) -> FUNCTIONS.get(functionName.trim());
 
     private final String source;
 
@@ -116,7 +101,7 @@ public class Template {
                 return Expression.EMPTY;
             }
 
-            List<String> tokens = FluentIterable.from(Splitter.on(FUNCTION_SEPARATOR).split(expression)).toList();
+            List<String> tokens =Arrays.asList(expression.split(FUNCTION_SEPARATOR));
             if (tokens.isEmpty()) {
                 return Expression.EMPTY;
             }
@@ -125,7 +110,10 @@ public class Template {
             List<Function<String, String>> functions = Collections.emptyList();
             if (tokens.size() > 1) {
                 List<String> functionNames = tokens.subList(1, tokens.size());
-                functions = FluentIterable.from(functionNames).transform(FUNCTION_RESOLVER).filter(Predicates.notNull()).toList();
+                functions = functionNames.stream()
+                		.map(FUNCTION_RESOLVER)
+                		.filter(Objects::nonNull)
+                		.collect(Collectors.toList());
             }
 
             return new SimpleExpression(variableName, functions);
@@ -134,15 +122,10 @@ public class Template {
 
     }
 
+    @FunctionalInterface
     private static interface Expression {
 
-        Expression EMPTY = new Expression() {
-
-            @Override
-            public String evaluate(Object model) {
-                return "";
-            }
-        };
+        Expression EMPTY = model -> "";
 
         String evaluate(Object model);
 
@@ -166,6 +149,7 @@ public class Template {
             if (functions.isEmpty()) {
                 return variable;
             }
+            
             for (Function<String, String> function : functions) {
                 variable = function.apply(variable);
             }

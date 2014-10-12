@@ -1,7 +1,7 @@
 package {{packageName}};
 
 /**
- * {{className}}
+ * {{bean.className}}
  * 
  * <p>
  * Don't modify this file!
@@ -10,12 +10,12 @@ package {{packageName}};
 public class {{className}} {
 
 	public static final String PACKAGE = "{{packageName}}";
-	public static final String FULL_NAME = "{{packageName}}.{{className}}";
-	public static final String NAME = "{{className}}";
+	public static final String FULL_NAME = "{{packageName}}.{{bean.className}}";
+	public static final String NAME = "{{bean.className}}";
 
 	public static class Property {
 {{# properties}}
 		public static final String {{name}} = "{{name}}";
-{{/ properties}}
+{{/}}
 	}
 }

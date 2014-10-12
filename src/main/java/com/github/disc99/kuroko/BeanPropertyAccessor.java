@@ -1,6 +1,6 @@
 package com.github.disc99.kuroko;
 
-import com.google.common.base.Function;
+import java.util.function.Function;
 
 
 

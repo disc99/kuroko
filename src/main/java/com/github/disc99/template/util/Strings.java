@@ -1,14 +1,12 @@
-package com.github.disc99.kuroko.util;
-
-import com.google.common.base.Strings;
+package com.github.disc99.template.util;
 
 /**
  * String utilities
  */
-public final class Strings2 {
+public final class Strings {
 
     public static String capitalize(String value) {
-        if (Strings.isNullOrEmpty(value)) {
+        if (isNullOrEmpty(value)) {
             return "";
         }
         int length = value.length();
@@ -16,14 +14,17 @@ public final class Strings2 {
     }
 
     public static String uncapitalize(String value) {
-        if (Strings.isNullOrEmpty(value)) {
+        if (isNullOrEmpty(value)) {
             return "";
         }
         int length = value.length();
         return new StringBuilder(length).append(Character.toLowerCase(value.charAt(0))).append(value.substring(1)).toString();
     }
 
-    private Strings2() {
+    public static boolean isNullOrEmpty(String string) {
+        return string == null || string.length() == 0;
     }
 
+    private Strings() {
+    }
 }

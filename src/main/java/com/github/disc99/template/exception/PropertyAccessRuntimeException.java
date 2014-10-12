@@ -1,4 +1,4 @@
-package com.github.disc99.kuroko.exception;
+package com.github.disc99.template.exception;
 
 /**
  * PropertyAccessRuntimeException
