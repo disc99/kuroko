@@ -5,7 +5,7 @@ import java.util.function.Predicate;
 
 
 /**
- * Predicates2
+ * Predicates
  */
 public final class Predicates {
 

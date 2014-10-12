@@ -4,7 +4,7 @@ apply plugin: 'maven'
 
 sourceCompatibility = 1.8
 group = 'com.github.disc99.kuroko'
-version = '0.0.1'
+version = '0.0.2'
 
 repositories {
     mavenCentral()
