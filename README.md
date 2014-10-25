@@ -33,7 +33,7 @@ public class Sample {
 }
 ```
 
-### Generated meta class
+### Generated kuroko class
 
 ```java
 package com.hoge;
