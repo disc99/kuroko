@@ -1,27 +1,41 @@
-apply plugin: 'java'
-apply plugin: 'idea'
-apply plugin: 'maven'
-
-group = 'com.github.disc99.kuroko'
-version = '0.0.3'
-
 ext {
     jdk = 1.8
     encoding = 'UTF-8'
 }
 
-compileJava {
-    sourceCompatibility = jdk
-    targetCompatibility = jdk
-    options.encoding = encoding
+allprojects {
+    repositories {
+        mavenCentral ()
+    }
 }
 
-repositories {
-    mavenCentral()
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'idea'
+    apply plugin: 'maven'
+
+    group = 'io.disc99.kuroko'
+    version = '0.0.3'
+
+    compileJava {
+        sourceCompatibility = rootProject.jdk
+        targetCompatibility = rootProject.jdk
+        options.encoding = rootProject.encoding
+    }
+
+    dependencies {
+        testCompile 'junit:junit:4.11'
+    }
 }
 
-dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.+'
+project(':annotation') {
+
+}
+
+project(':processor') {
+    dependencies {
+        compile project(':annotation')
+    }
 }
 
 task wrapper(type: Wrapper) {
