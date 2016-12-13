@@ -1,4 +1,4 @@
-package io.disc99.template.util;
+package io.disc99.kuroko.processor.util;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
-import io.disc99.template.exception.PropertyAccessRuntimeException;
+import io.disc99.kuroko.processor.exception.PropertyAccessRuntimeException;
 
 /**
  * Bean utilities

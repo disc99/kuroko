@@ -1,4 +1,4 @@
-package io.disc99.template.util;
+package io.disc99.kuroko.processor.util;
 
 /**
  * String utilities

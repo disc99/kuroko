@@ -1,4 +1,4 @@
-package io.disc99.kuroko.processor.annotation.processor;
+package io.disc99.kuroko.processor;
 
 /**
  * Options

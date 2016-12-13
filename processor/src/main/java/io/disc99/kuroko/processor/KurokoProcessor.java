@@ -1,9 +1,7 @@
-package io.disc99.kuroko.processor.annotation.processor;
+package io.disc99.kuroko.processor;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,8 +24,10 @@ import javax.lang.model.util.ElementFilter;
 import javax.tools.Diagnostic.Kind;
 import javax.tools.JavaFileObject;
 
-import io.disc99.template.engine.Template;
-import io.disc99.template.util.Strings;
+import com.github.jknack.handlebars.Handlebars;
+
+import com.github.jknack.handlebars.Template;
+import io.disc99.kuroko.processor.util.Strings;
 
 @SupportedAnnotationTypes(Constants.ANNOTATION)
 public class KurokoProcessor extends AbstractProcessor {
@@ -35,13 +35,7 @@ public class KurokoProcessor extends AbstractProcessor {
     private static final Template TEMPLATE;
     static {
         try {
-        	StringBuffer sb = new StringBuffer();
-			BufferedReader br = new BufferedReader(new InputStreamReader(KurokoProcessor.class.getResourceAsStream("meta-class.template"), "UTF-8"));
-			for (int c = br.read(); c != -1; c = br.read()){
-				sb.append((char)c);
-			}
-
-			TEMPLATE = new Template(sb.toString());   
+            TEMPLATE = new Handlebars().compile("meta-class");
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -61,7 +55,7 @@ public class KurokoProcessor extends AbstractProcessor {
         for (TypeElement annotation : annotations) {
             for (TypeElement element : ElementFilter.typesIn(roundEnv.getElementsAnnotatedWith(annotation))) {
                 if (hasAnnotation(element)) {
-                    generateMetaClass(element, roundEnv);
+                    generateMetaClass(element);
                 }
             }
         }
@@ -70,23 +64,19 @@ public class KurokoProcessor extends AbstractProcessor {
 
     private boolean hasAnnotation(TypeElement element) {
         List<? extends AnnotationMirror> mirrors = element.getAnnotationMirrors();
-        if (mirrors == null || mirrors.isEmpty()) {
+        if (mirrors == null) {
             return false;
         }
-        for (AnnotationMirror mirror : mirrors) {
-            if (mirror.getAnnotationType().toString().equals(Constants.ANNOTATION)) {
-                return true;
-            }
-        }
-        return false;
+        return mirrors.stream()
+                .anyMatch(m -> m.getAnnotationType().toString().equals(Constants.ANNOTATION));
     }
 
-    private void generateMetaClass(TypeElement element, RoundEnvironment roundEnv) {
+    private void generateMetaClass(TypeElement element) {
         try {
             Model model = evaluate(element);
             JavaFileObject file = processingEnv.getFiler().createSourceFile(model.getFullQualifiedName(), element);
             try (BufferedWriter writer = new BufferedWriter(file.openWriter())) {
-                writer.write(TEMPLATE.render(model));
+                writer.write(TEMPLATE.apply(model));
                 writer.flush();
             }
         } catch (IOException e) {
@@ -170,7 +160,7 @@ public class KurokoProcessor extends AbstractProcessor {
 
         public List<PropertyMetaData> getProperties() {
         	return properties.values().stream()
-        				.filter(property -> property.isWritable())
+        				.filter(PropertyMetaData::isWritable)
         				.collect(Collectors.toList());
         }
 

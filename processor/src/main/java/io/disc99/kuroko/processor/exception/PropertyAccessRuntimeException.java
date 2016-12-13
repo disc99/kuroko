@@ -1,4 +1,4 @@
-package io.disc99.template.exception;
+package io.disc99.kuroko.processor.exception;
 
 /**
  * PropertyAccessRuntimeException
