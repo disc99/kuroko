@@ -14,8 +14,8 @@ public class {{className}} {
 	public static final String NAME = "{{bean.className}}";
 
 	public static class Property {
-{{# properties}}
+{{#each properties}}
 		public static final String {{name}} = "{{name}}";
-{{/}}
+{{/each}}
 	}
 }
