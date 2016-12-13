@@ -36,6 +36,8 @@ project(':processor') {
     dependencies {
         compile project(':annotation')
         compile group: 'com.github.jknack', name: 'handlebars', version: '4.0.6'
+        testCompile group: 'com.google.testing.compile', name: 'compile-testing', version: '0.10'
+
 
     }
 }
