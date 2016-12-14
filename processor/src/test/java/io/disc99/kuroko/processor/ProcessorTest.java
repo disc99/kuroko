@@ -5,7 +5,6 @@ import static com.google.testing.compile.JavaSourceSubjectFactory.javaSource;
 
 import org.junit.Test;
 
-import com.google.common.io.Resources;
 import com.google.testing.compile.JavaFileObjects;
 
 public class ProcessorTest {
@@ -14,17 +13,17 @@ public class ProcessorTest {
     public void testProcess() throws Exception {
 
         assert_().about(javaSource())
-                .that(JavaFileObjects.forResource(Resources.getResource("HelloWorld.java")))
+                .that(JavaFileObjects.forResource(ProcessorTest.class.getResource("/HelloWorld.java")))
                 .processedWith(new KurokoProcessor())
                 .compilesWithoutError()
                 .and()
-                .generatesSources(JavaFileObjects.forSourceString("foo.bar.baz.Blah", "package foo.bar.baz;\n"
+                .generatesSources(JavaFileObjects.forSourceString("sample.processor.generated.Fuga", "package sample.processor.generated;\n"
                         + "\n"
                         + "import java.lang.String;\n"
                         + "import javax.annotation.Generated;\n"
                         + "\n"
                         + "@Generated({\"me.geso.sample.hello.MyProcessor\"})\n"
-                        + "public class Blah {\n"
+                        + "public class Fuga {\n"
                         + "  public String hello() {\n"
                         + "    return \"hello\";\n"
                         + "  }\n"

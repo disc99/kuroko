@@ -2,15 +2,11 @@ package io.disc99.kuroko.processor;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.io.Writer;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.RoundEnvironment;
-import javax.annotation.processing.SupportedAnnotationTypes;
+import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
@@ -29,7 +25,8 @@ import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
 import io.disc99.kuroko.processor.util.Strings;
 
-@SupportedAnnotationTypes(Constants.ANNOTATION)
+@SupportedAnnotationTypes("io.disc99.kuroko.annotation.Kuroko")
+//@SupportedAnnotationTypes("*")
 public class KurokoProcessor extends AbstractProcessor {
 
     private static final Template TEMPLATE;
@@ -40,6 +37,13 @@ public class KurokoProcessor extends AbstractProcessor {
 			throw new RuntimeException(e);
 		}
     }
+//    @Override
+//    public Set<String> getSupportedAnnotationTypes() {
+//        Set<String> supportedAnnotationTypes = new HashSet<>();
+//        supportedAnnotationTypes.add("io.disc99.kuroko.annotation.Kuroko");
+//
+//        return supportedAnnotationTypes;
+//    }
 
     /** {@inheritDoc} */
     @Override
@@ -49,6 +53,31 @@ public class KurokoProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+
+        String src =
+                "package sample.processor.generated;\r\n"
+                        + "public class Fuga {\r\n"
+                        + "    public void hello() {\r\n"
+                        + "        System.out.println(\"Hello World!!\");\r\n"
+                        + "    }\r\n"
+                        + "}\r\n"
+                ;
+
+        try {
+            Messager messager = super.processingEnv.getMessager();
+
+            Filer filer = super.processingEnv.getFiler();
+            JavaFileObject javaFile = filer.createSourceFile("Fuga");
+
+            try (Writer writer = javaFile.openWriter()) {
+                writer.write(src);
+            }
+
+            messager.printMessage(Kind.NOTE, "generate source code!!");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         if (roundEnv.processingOver()) {
             return true;
         }
