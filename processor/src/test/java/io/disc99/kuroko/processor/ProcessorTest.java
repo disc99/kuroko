@@ -13,11 +13,12 @@ public class ProcessorTest {
     public void testProcess() throws Exception {
 
         assert_().about(javaSource())
-                .that(JavaFileObjects.forResource(ProcessorTest.class.getResource("/HelloWorld.java")))
+                .that(JavaFileObjects.forResource(ProcessorTest.class.getResource("/Person.java")))
                 .processedWith(new KurokoProcessor())
                 .compilesWithoutError()
                 .and()
-                .generatesSources(JavaFileObjects.forSourceString("sample.processor.generated.Fuga", "package sample.processor.generated;\n"
+                .generatesSources(JavaFileObjects.forSourceString("foo.bar._Person",
+                        "package sample.processor.generated;\n"
                         + "\n"
                         + "import java.lang.String;\n"
                         + "import javax.annotation.Generated;\n"
