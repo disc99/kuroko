@@ -1,5 +1,6 @@
 package {{packageName}};
 
+import java.lang.reflect.Field;
 
 /**
  * {@link {{packageName}}.{{baseClassName}} } meta class.
@@ -11,26 +12,24 @@ package {{packageName}};
 public class {{className}} {
     private final {{baseClassName}} bean;
 
-    public {{className}}({{bean.type}} bean) {
+    public {{className}}({{baseClassName}} bean) {
         this.bean = bean;
     }
 
-    {{#each getters}}
-    public {{returunType}} {{methodName}}() {
+    {{#each properties}}
+    public {{getterReturnType}} {{getterMethodName}}() {
         try {
-            Field field = {{className}}.class.getDeclaredField({{fieldName}});
+            Field field = {{baseClassName}}.class.getDeclaredField("{{propertyName}}");
             field.setAccessible(true);
-            return field.get(bean);
+            return ({{getterReturnType}}) field.get(bean);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
-    {{/each}}
 
-    {{#each setters}}
-    public void {{methodName}}({{parameterType}} value) {
+    public void {{setterMethodName}}({{setterParameterType}} value) {
         try {
-            Field field = {{className}}.class.getDeclaredField({{fieldName}});
+            Field field = {{baseClassName}}.class.getDeclaredField("{{propertyName}}");
             field.setAccessible(true);
             field.set(bean, value);
         } catch (Exception e) {
@@ -38,5 +37,4 @@ public class {{className}} {
         }
     }
     {{/each}}
-
 }

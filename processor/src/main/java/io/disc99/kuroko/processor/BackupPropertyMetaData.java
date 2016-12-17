@@ -1,16 +1,9 @@
 package io.disc99.kuroko.processor;
 
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.Writer;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import javax.annotation.processing.*;
-import javax.lang.model.SourceVersion;
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.PrimitiveType;
@@ -18,14 +11,14 @@ import javax.lang.model.type.TypeMirror;
 
 import io.disc99.kuroko.processor.util.Strings;
 
-public class PropertyMetaData {
+public class BackupPropertyMetaData {
 
-    final BeanMetaData bean;
+    final BackupBeanMetaData bean;
     final ExecutableElement element;
     final boolean writable;
     final ProcessingEnvironment processingEnv;
 
-    PropertyMetaData(BeanMetaData bean, ExecutableElement element, boolean writable, ProcessingEnvironment processingEnv) {
+    BackupPropertyMetaData(BackupBeanMetaData bean, ExecutableElement element, boolean writable, ProcessingEnvironment processingEnv) {
         this.bean = bean;
         this.element = element;
         this.writable = writable;
@@ -49,7 +42,7 @@ public class PropertyMetaData {
         return getTypeMirror().toString();
     }
 
-    public BeanMetaData getBean() {
+    public BackupBeanMetaData getBean() {
         return bean;
     }
 

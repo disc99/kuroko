@@ -1,11 +1,11 @@
 package io.disc99.kuroko.processor;
 
+import com.google.testing.compile.JavaFileObjects;
+import org.junit.Test;
+
 import static com.google.common.truth.Truth.assert_;
 import static com.google.testing.compile.JavaSourceSubjectFactory.javaSource;
 
-import org.junit.Test;
-
-import com.google.testing.compile.JavaFileObjects;
 
 public class ProcessorTest {
 
@@ -18,13 +18,13 @@ public class ProcessorTest {
                 .compilesWithoutError()
                 .and()
                 .generatesSources(JavaFileObjects.forSourceString("foo.bar._Person",
-                        "package sample.processor.generated;\n"
+                        "package foo.bar;\n"
                         + "\n"
                         + "import java.lang.String;\n"
                         + "import javax.annotation.Generated;\n"
                         + "\n"
                         + "@Generated({\"me.geso.sample.hello.MyProcessor\"})\n"
-                        + "public class Fuga {\n"
+                        + "public class _Person {\n"
                         + "  public String hello() {\n"
                         + "    return \"hello\";\n"
                         + "  }\n"

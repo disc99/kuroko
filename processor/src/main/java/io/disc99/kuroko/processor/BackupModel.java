@@ -7,21 +7,21 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 
-public class Model {
+public class BackupModel {
 
     final TypeElement element;
-    final BeanMetaData bean;
-    final Map<String, PropertyMetaData> properties;
+    final BackupBeanMetaData bean;
+    final Map<String, BackupPropertyMetaData> properties;
     final ProcessingEnvironment processingEnv;
 
-    Model(TypeElement element, BeanMetaData bean, Map<String, PropertyMetaData> properties, ProcessingEnvironment processingEnv) {
+    public BackupModel(TypeElement element, BackupBeanMetaData bean, Map<String, BackupPropertyMetaData> properties, ProcessingEnvironment processingEnv) {
         this.element = element;
         this.bean = bean;
         this.properties = properties;
         this.processingEnv = processingEnv;
     }
 
-    public BeanMetaData getBean() {
+    public BackupBeanMetaData getBean() {
         return bean;
     }
 
@@ -37,13 +37,13 @@ public class Model {
         return toMetaClassName(bean.getClassName());
     }
 
-    public List<PropertyMetaData> getProperties() {
+    public List<BackupPropertyMetaData> getProperties() {
         return properties.values().stream()
-                .filter(PropertyMetaData::isWritable)
+                .filter(BackupPropertyMetaData::isWritable)
                 .collect(Collectors.toList());
     }
 
-    public List<PropertyMetaData> getPropertyAccessors() {
+    public List<BackupPropertyMetaData> getPropertyAccessors() {
         return properties.values().stream()
                 .filter(property -> !property.isWritable())
                 .collect(Collectors.toList());

@@ -4,26 +4,21 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.PrimitiveType;
-import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import javax.tools.Diagnostic.Kind;
 import javax.tools.JavaFileObject;
 
+import com.github.jknack.handlebars.EscapingStrategy;
 import com.github.jknack.handlebars.Handlebars;
 
 import com.github.jknack.handlebars.Template;
-import io.disc99.kuroko.processor.util.Strings;
 
 @SupportedAnnotationTypes(Constants.ANNOTATION)
 public class KurokoProcessor extends AbstractProcessor {
@@ -32,7 +27,10 @@ public class KurokoProcessor extends AbstractProcessor {
     private static final Template TEMPLATE;
     static {
         try {
-            TEMPLATE = new Handlebars().compile("meta-class");
+
+            TEMPLATE = new Handlebars()
+                    .with(EscapingStrategy.NOOP)
+                    .compile("kuroko-class");
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -52,29 +50,29 @@ public class KurokoProcessor extends AbstractProcessor {
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
 
-        String src =
-                "package sample.processor.generated;\r\n"
-                        + "public class Fuga {\r\n"
-                        + "    public void hello() {\r\n"
-                        + "        System.out.println(\"Hello World!!\");\r\n"
-                        + "    }\r\n"
-                        + "}\r\n"
-                ;
-
-        try {
-            Messager messager = super.processingEnv.getMessager();
-
-            Filer filer = super.processingEnv.getFiler();
-            JavaFileObject javaFile = filer.createSourceFile("Fuga");
-
-            try (Writer writer = javaFile.openWriter()) {
-                writer.write(src);
-            }
-
-            messager.printMessage(Kind.NOTE, "generate source code!!");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        String src =
+//                "package sample.processor.generated;\r\n"
+//                        + "public class Fuga {\r\n"
+//                        + "    public void hello() {\r\n"
+//                        + "        System.out.println(\"Hello World!!\");\r\n"
+//                        + "    }\r\n"
+//                        + "}\r\n"
+//                ;
+//
+//        try {
+//            Messager messager = super.processingEnv.getMessager();
+//
+//            Filer filer = super.processingEnv.getFiler();
+//            JavaFileObject javaFile = filer.createSourceFile("Fuga");
+//
+//            try (Writer writer = javaFile.openWriter()) {
+//                writer.write(src);
+//            }
+//
+//            messager.printMessage(Kind.NOTE, "generate source code!!");
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
 
         if (roundEnv.processingOver()) {
             return true;
@@ -101,10 +99,11 @@ public class KurokoProcessor extends AbstractProcessor {
 
     private void generateMetaClass(TypeElement element) {
         try {
-            Model model = evaluate(element);
-            JavaFileObject file = processingEnv.getFiler().createSourceFile(model.getFullQualifiedName(), element);
+//            Model model = evaluate(element);
+            MetaObject object = evaluate2(element);
+            JavaFileObject file = processingEnv.getFiler().createSourceFile(object.getFullQualifiedName(), element);
             try (BufferedWriter writer = new BufferedWriter(file.openWriter())) {
-                writer.write(TEMPLATE.apply(model));
+                writer.write(TEMPLATE.apply(object));
                 writer.flush();
             }
         } catch (IOException e) {
@@ -112,12 +111,16 @@ public class KurokoProcessor extends AbstractProcessor {
         }
     }
 
+    private MetaObject evaluate2(TypeElement element) {
+        return new MetaObject(element, processingEnv);
+    }
 
-    private Model evaluate(TypeElement element) {
 
-        BeanMetaData bean = new BeanMetaData(element, processingEnv);
+    private BackupModel evaluate(TypeElement element) {
 
-        Map<String, PropertyMetaData> properties = new LinkedHashMap<>();
+        BackupBeanMetaData bean = new BackupBeanMetaData(element, processingEnv);
+
+        Map<String, BackupPropertyMetaData> properties = new LinkedHashMap<>();
 
         // collect public getters
         for (ExecutableElement e : ElementFilter.methodsIn(element.getEnclosedElements())) {
@@ -126,7 +129,7 @@ public class KurokoProcessor extends AbstractProcessor {
                 continue;
             }
             if (modifiers.contains(Modifier.PUBLIC) && e.getParameters().isEmpty()) {
-                PropertyMetaData metaData = new PropertyMetaData(bean, e, false, processingEnv);
+                BackupPropertyMetaData metaData = new BackupPropertyMetaData(bean, e, false, processingEnv);
                 if (metaData.isGetter()) {
                     String propertyName = metaData.getName();
                     if (properties.containsKey(propertyName)) {
@@ -143,7 +146,7 @@ public class KurokoProcessor extends AbstractProcessor {
                 continue;
             }
             if (modifiers.contains(Modifier.PUBLIC) && e.getParameters().size() == 1) {
-                PropertyMetaData metaData = new PropertyMetaData(bean, e, true, processingEnv);
+                BackupPropertyMetaData metaData = new BackupPropertyMetaData(bean, e, true, processingEnv);
                 if (metaData.isSetter()) {
                     String propertyName = metaData.getName();
                     if (properties.containsKey(propertyName)) {
@@ -153,6 +156,6 @@ public class KurokoProcessor extends AbstractProcessor {
             }
         }
 
-        return new Model(element, bean, properties, processingEnv);
+        return new BackupModel(element, bean, properties, processingEnv);
     }
 }

@@ -7,7 +7,7 @@ package io.disc99.kuroko.processor;
  * @param <T> the type of the bean which this property belongs to
  * @param <V> the type of this property
  */
-public interface BeanProperty<T, V> extends BeanPropertyAccessor<T, V> {
+public interface BackupBeanProperty<T, V> extends BackupBeanPropertyAccessor<T, V> {
 
     /**
      * Apply the value to the bean

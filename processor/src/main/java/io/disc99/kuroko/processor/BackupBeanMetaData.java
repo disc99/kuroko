@@ -4,12 +4,12 @@ package io.disc99.kuroko.processor;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;
 
-public class BeanMetaData {
+public class BackupBeanMetaData {
 
     final TypeElement element;
     final ProcessingEnvironment processingEnv;
 
-    BeanMetaData(TypeElement element, ProcessingEnvironment processingEnv) {
+    BackupBeanMetaData(TypeElement element, ProcessingEnvironment processingEnv) {
         this.element = element;
         this.processingEnv = processingEnv;
     }
@@ -25,5 +25,4 @@ public class BeanMetaData {
     public String getClassName() {
         return element.getSimpleName().toString();
     }
-
 }

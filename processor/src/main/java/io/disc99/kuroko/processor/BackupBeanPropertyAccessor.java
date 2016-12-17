@@ -10,7 +10,7 @@ import java.util.function.Function;
  * @param <T> the type of the bean which this property belongs to
  * @param <V> the type of this property
  */
-public interface BeanPropertyAccessor<T, V> extends Function<T, V> {
+public interface BackupBeanPropertyAccessor<T, V> extends Function<T, V> {
 
     /**
      * Returns the name of this property
