@@ -50,30 +50,6 @@ public class KurokoProcessor extends AbstractProcessor {
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
 
-//        String src =
-//                "package sample.processor.generated;\r\n"
-//                        + "public class Fuga {\r\n"
-//                        + "    public void hello() {\r\n"
-//                        + "        System.out.println(\"Hello World!!\");\r\n"
-//                        + "    }\r\n"
-//                        + "}\r\n"
-//                ;
-//
-//        try {
-//            Messager messager = super.processingEnv.getMessager();
-//
-//            Filer filer = super.processingEnv.getFiler();
-//            JavaFileObject javaFile = filer.createSourceFile("Fuga");
-//
-//            try (Writer writer = javaFile.openWriter()) {
-//                writer.write(src);
-//            }
-//
-//            messager.printMessage(Kind.NOTE, "generate source code!!");
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-
         if (roundEnv.processingOver()) {
             return true;
         }

@@ -1,3 +1,17 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        jcenter()
+    }
+    dependencies {
+        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:0.6"
+    }
+}
+
+import java.text.SimpleDateFormat
+
+def globalVersion = new Version(currentVersion)
+
 ext {
     jdk = 1.8
     encoding = 'UTF-8'
@@ -5,7 +19,42 @@ ext {
 
 allprojects {
     repositories {
-        mavenCentral ()
+        mavenCentral()
+        jcenter()
+    }
+    apply plugin: 'com.jfrog.bintray'
+
+    ext.publish = true
+    bintray {
+        user = bintray_user
+        key = bintray_key
+        configurations = ['published', 'archives']
+        //publications = ['published']
+        filesSpec {
+            from 'files'
+            into 'standalone_files/level1'
+            rename '(.+)\\.(.+)', '$1-suffix.$2'
+        }
+        publish = project.publish
+        pkg {
+            repo = 'maven'
+            //userOrg = 'myorg'
+            name = 'kuroko'
+            desc = 'what a fantastic package indeed!'
+            websiteUrl = 'https://github.com/bintray/gradle-bintray-plugin'
+            issueTrackerUrl = 'https://github.com/bintray/gradle-bintray-plugin/issues'
+            vcsUrl = 'https://github.com/bintray/gradle-bintray-plugin.git'
+            licenses = ['MIT']
+            labels = ['gear', 'gore', 'gorilla']
+            attributes= ['plat': ['linux', 'osx']]
+            publicDownloadNumbers = true
+            version {
+                name = '0.0.3-Final' //Optional logical version name
+                desc = 'optional, version-specific description'
+                vcsTag = '0.0.3'
+                attributes= ['a': ['ay1', 'ay2', 'ay3'], 'b': ['bee'], c: 'cee']
+            }
+        }
     }
 }
 
@@ -13,9 +62,28 @@ subprojects {
     apply plugin: 'java'
     apply plugin: 'idea'
     apply plugin: 'maven'
+    apply plugin: 'maven'
 
     group = 'io.disc99.kuroko'
     version = '0.0.3'
+
+    configurations {
+        published
+    }
+
+    task sourceJar(type: Jar) {
+        from sourceSets.main.allSource
+        classifier = 'sources'
+    }
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        classifier = 'javadoc'
+        from javadoc.destinationDir
+    }
+
+    artifacts {
+        published sourceJar
+        published javadocJar
+    }
 
     compileJava {
         sourceCompatibility = rootProject.jdk
@@ -37,10 +105,44 @@ project(':processor') {
         compile project(':annotation')
         compile group: 'com.github.jknack', name: 'handlebars', version: '4.0.6'
         testCompile group: 'com.google.testing.compile', name: 'compile-testing', version: '0.10'
-
-
     }
 }
+
+
+configurations {
+    published
+}
+
+class Version {
+    String originalVersion
+    String thisVersion
+    String status
+    Date buildTime
+
+    Version(String versionValue) {
+        buildTime = new Date()
+        originalVersion = versionValue
+        if (originalVersion.endsWith('-SNAPSHOT')) {
+            status = 'integration'
+            thisVersion = originalVersion.substring(0, originalVersion.length() - 'SNAPSHOT'.length()) + getTimestamp()
+        } else {
+            status = 'release'
+            thisVersion = versionValue
+        }
+    }
+
+    String getTimestamp() {
+        // Convert local file timestamp to UTC
+        def format = new SimpleDateFormat('yyyyMMddHHmmss')
+        format.setCalendar(Calendar.getInstance(TimeZone.getTimeZone('UTC')));
+        return format.format(buildTime)
+    }
+
+    String toString() {
+        thisVersion
+    }
+}
+
 
 task wrapper(type: Wrapper) {
     gradleVersion = '3.2.1'
