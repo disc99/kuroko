@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Kuroko
+ * Annotate Kuroko class.
  */
 @Retention(RetentionPolicy.CLASS)
 @Target(ElementType.TYPE)

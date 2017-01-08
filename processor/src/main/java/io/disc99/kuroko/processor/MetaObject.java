@@ -13,11 +13,11 @@ public class MetaObject {
     final ProcessingEnvironment processingEnv;
     final List<MetaProperty> properties;
 
-    MetaObject(TypeElement element, ProcessingEnvironment processingEnv) {
+    MetaObject(ProcessorContext context, TypeElement element, ProcessingEnvironment processingEnv) {
         this.element = element;
         this.processingEnv = processingEnv;
         this.properties = ElementFilter.fieldsIn(element.getEnclosedElements()).stream()
-                .map(MetaProperty::new)
+                .map(e -> new MetaProperty(context, e))
                 .collect(toList());
     }
 

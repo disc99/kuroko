@@ -15,19 +15,25 @@ public class {{className}} {
     public {{className}}({{baseClassName}} bean) {
         this.bean = bean;
     }
-
     {{#each properties}}
-    public {{getterReturnType}} {{getterMethodName}}() {
+        {{#each getters}}
+    public {{returnType}} {{methodName}}() {
         try {
             Field field = {{baseClassName}}.class.getDeclaredField("{{propertyName}}");
             field.setAccessible(true);
-            return ({{getterReturnType}}) field.get(bean);
+            return ({{returnType}}) field.get(bean);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
-
-    public void {{setterMethodName}}({{setterParameterType}} value) {
+        {{/each}}
+        {{#each kurokoGetters}}
+    public {{returnType}} {{methodName}}() {
+        return new {{returnType}}({{getter.methodName}}());
+    }
+        {{/each}}
+        {{#each setters}}
+    public void {{methodName}}({{parameterType}} value) {
         try {
             Field field = {{baseClassName}}.class.getDeclaredField("{{propertyName}}");
             field.setAccessible(true);
@@ -36,5 +42,6 @@ public class {{className}} {
             throw new RuntimeException(e);
         }
     }
+        {{/each}}
     {{/each}}
 }

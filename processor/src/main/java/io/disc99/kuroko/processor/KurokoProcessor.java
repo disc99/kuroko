@@ -4,6 +4,8 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
@@ -19,6 +21,8 @@ import com.github.jknack.handlebars.EscapingStrategy;
 import com.github.jknack.handlebars.Handlebars;
 
 import com.github.jknack.handlebars.Template;
+
+import static java.util.stream.Collectors.toSet;
 
 @SupportedAnnotationTypes(Constants.ANNOTATION)
 public class KurokoProcessor extends AbstractProcessor {
@@ -54,10 +58,18 @@ public class KurokoProcessor extends AbstractProcessor {
             return true;
         }
 
+        Set<String> targets = annotations.stream()
+                .flatMap(annotation -> ElementFilter.typesIn(roundEnv.getElementsAnnotatedWith(annotation)).stream())
+                .filter(this::hasAnnotation)
+                .map(element -> element.getQualifiedName().toString())
+                .collect(toSet());
+        ProcessorContext context = new ProcessorContext(targets);
+
+
         for (TypeElement annotation : annotations) {
             for (TypeElement element : ElementFilter.typesIn(roundEnv.getElementsAnnotatedWith(annotation))) {
                 if (hasAnnotation(element)) {
-                    generateMetaClass(element);
+                    generateMetaClass(context, element);
                 }
             }
         }
@@ -73,10 +85,10 @@ public class KurokoProcessor extends AbstractProcessor {
                 .anyMatch(m -> m.getAnnotationType().toString().equals(Constants.ANNOTATION));
     }
 
-    private void generateMetaClass(TypeElement element) {
+    private void generateMetaClass(ProcessorContext context, TypeElement element) {
         try {
 //            Model model = evaluate(element);
-            MetaObject object = evaluate2(element);
+            MetaObject object = evaluate2(context, element);
             JavaFileObject file = processingEnv.getFiler().createSourceFile(object.getFullQualifiedName(), element);
             try (BufferedWriter writer = new BufferedWriter(file.openWriter())) {
                 writer.write(TEMPLATE.apply(object));
@@ -87,8 +99,8 @@ public class KurokoProcessor extends AbstractProcessor {
         }
     }
 
-    private MetaObject evaluate2(TypeElement element) {
-        return new MetaObject(element, processingEnv);
+    private MetaObject evaluate2(ProcessorContext context, TypeElement element) {
+        return new MetaObject(context, element, processingEnv);
     }
 
 
